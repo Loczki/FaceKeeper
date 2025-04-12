@@ -1,24 +1,11 @@
-/*
- * Copyright 2023 The TensorFlow Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.google.mediapipe.examples.facedetection
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
+import android.view.animation.LinearInterpolator
 import androidx.core.content.ContextCompat
 import com.google.mediapipe.tasks.vision.facedetector.FaceDetectorResult
 import kotlin.math.min
@@ -28,15 +15,63 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     private var results: FaceDetectorResult? = null
     private var boxPaint = Paint()
+    private var cyberpunkOuterPaint = Paint()
+    private var cyberpunkInnerPaint = Paint()
     private var textBackgroundPaint = Paint()
     private var textPaint = Paint()
+    private var namePaint = Paint()
+    private var statusPaint = Paint()
+
+    private var scanLineY = 0f
+    private var scanLineAnimator: ValueAnimator? = null
+    private var avatarBitmap: Bitmap? = null
+    private var scanLinePaint = Paint()
 
     private var scaleFactor: Float = 1f
-
     private var bounds = Rect()
+    private val cornerRadius = 8f
+    private val animCornerLength = 20f
+    private val cornerStrokeWidth = 8f
+    private val scanLineHeight = 5f
+
+    // Hardcoded information
+    private val personName = "V. SILVERHAND"
+    private val personStatus = "STATUS: IDENTIFIED"
+    private val idNumber = "ID: NC-" + (1000000..9999999).random()
 
     init {
         initPaints()
+        loadResources()
+        startAnimations()
+    }
+
+    private fun loadResources() {
+        // Load the avatar bitmap
+        val drawable = ContextCompat.getDrawable(context!!, R.drawable.cyberpunk_avatar)
+        if (drawable != null) {
+            val width = 150
+            val height = 150
+            avatarBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(avatarBitmap!!)
+            drawable.setBounds(0, 0, canvas.width, canvas.height)
+            drawable.draw(canvas)
+        }
+    }
+
+    private fun startAnimations() {
+        // Scan line animation
+        scanLineAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 1500
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.RESTART
+            interpolator = LinearInterpolator()
+            addUpdateListener { animation ->
+                val animatedValue = animation.animatedValue as Float
+                scanLineY = animatedValue
+                invalidate()
+            }
+            start()
+        }
     }
 
     fun clear() {
@@ -44,12 +79,17 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         textPaint.reset()
         textBackgroundPaint.reset()
         boxPaint.reset()
+        cyberpunkOuterPaint.reset()
+        cyberpunkInnerPaint.reset()
+        namePaint.reset()
+        statusPaint.reset()
+        scanLinePaint.reset()
         invalidate()
         initPaints()
     }
 
     private fun initPaints() {
-        textBackgroundPaint.color = Color.BLACK
+        textBackgroundPaint.color = Color.parseColor("#80000000") // Semi-transparent black
         textBackgroundPaint.style = Paint.Style.FILL
         textBackgroundPaint.textSize = 50f
 
@@ -60,6 +100,34 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         boxPaint.color = ContextCompat.getColor(context!!, R.color.mp_primary)
         boxPaint.strokeWidth = 8F
         boxPaint.style = Paint.Style.STROKE
+
+        // Cyberpunk-style outer box
+        cyberpunkOuterPaint.color = Color.parseColor("#00FFFF") // Cyan
+        cyberpunkOuterPaint.strokeWidth = cornerStrokeWidth
+        cyberpunkOuterPaint.style = Paint.Style.STROKE
+        cyberpunkOuterPaint.pathEffect = DashPathEffect(floatArrayOf(10f, 5f), 0f)
+        cyberpunkOuterPaint.setShadowLayer(15f, 0f, 0f, Color.parseColor("#00FFFF"))
+
+        // Cyberpunk-style inner box
+        cyberpunkInnerPaint.color = Color.parseColor("#FF00FF") // Magenta
+        cyberpunkInnerPaint.strokeWidth = cornerStrokeWidth / 2
+        cyberpunkInnerPaint.style = Paint.Style.STROKE
+        cyberpunkInnerPaint.pathEffect = DashPathEffect(floatArrayOf(5f, 10f), 0f)
+
+        // Scan line paint
+        scanLinePaint.color = Color.parseColor("#80FF00FF") // Semi-transparent magenta
+        scanLinePaint.strokeWidth = scanLineHeight
+        scanLinePaint.style = Paint.Style.STROKE
+
+        // Name text paint
+        namePaint.color = Color.parseColor("#00FFFF") // Cyan
+        namePaint.textSize = 40f
+        namePaint.typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
+
+        // Status text paint
+        statusPaint.color = Color.parseColor("#FF00FF") // Magenta
+        statusPaint.textSize = 30f
+        statusPaint.typeface = Typeface.create("monospace", Typeface.NORMAL)
     }
 
     override fun draw(canvas: Canvas) {
@@ -74,45 +142,84 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 val left = boundingBox.left * scaleFactor
                 val right = boundingBox.right * scaleFactor
 
-                // Draw bounding box around detected faces
-                val drawableRect = RectF(left, top, right, bottom)
-                canvas.drawRect(drawableRect, boxPaint)
+                val boxHeight = bottom - top
+                val boxWidth = right - left
 
-                // Create text to display alongside detected faces
-                val drawableText =
-                    detection.categories()[0].categoryName() +
-                            " " +
-                            String.format(
-                                "%.2f",
-                                detection.categories()[0].score()
-                            )
+                // Draw cyberpunk-style outer box with corner accents
+                drawCyberpunkBox(canvas, left, top, right, bottom)
 
-                // Draw rect behind display text
-                textBackgroundPaint.getTextBounds(
-                    drawableText,
-                    0,
-                    drawableText.length,
-                    bounds
-                )
-                val textWidth = bounds.width()
-                val textHeight = bounds.height()
-                canvas.drawRect(
-                    left,
-                    top,
-                    left + textWidth + Companion.BOUNDING_RECT_TEXT_PADDING,
-                    top + textHeight + Companion.BOUNDING_RECT_TEXT_PADDING,
-                    textBackgroundPaint
-                )
+                // Draw scan line
+                val currentScanY = top + (boxHeight * scanLineY)
+                canvas.drawLine(left, currentScanY, right, currentScanY, scanLinePaint)
 
-                // Draw text for detected face
-                canvas.drawText(
-                    drawableText,
-                    left,
-                    top + bounds.height(),
-                    textPaint
+                // Draw avatar image
+                avatarBitmap?.let { bitmap ->
+                    val avatarLeft = left + 10f
+                    val avatarTop = top - bitmap.height - 10f
+                    if (avatarTop > 0) {
+                        canvas.drawBitmap(bitmap, avatarLeft, avatarTop, null)
+
+                        // Draw name and status
+                        canvas.drawText(personName, avatarLeft + bitmap.width + 10f,
+                            avatarTop + 40f, namePaint)
+                        canvas.drawText(personStatus, avatarLeft + bitmap.width + 10f,
+                            avatarTop + 80f, statusPaint)
+                        canvas.drawText(idNumber, avatarLeft + bitmap.width + 10f,
+                            avatarTop + 120f, statusPaint)
+                    } else {
+                        // Draw below the face if not enough space above
+                        val altAvatarTop = bottom + 10f
+                        canvas.drawBitmap(bitmap, avatarLeft, altAvatarTop, null)
+
+                        canvas.drawText(personName, avatarLeft + bitmap.width + 10f,
+                            altAvatarTop + 40f, namePaint)
+                        canvas.drawText(personStatus, avatarLeft + bitmap.width + 10f,
+                            altAvatarTop + 80f, statusPaint)
+                        canvas.drawText(idNumber, avatarLeft + bitmap.width + 10f,
+                            altAvatarTop + 120f, statusPaint)
+                    }
+                }
+
+                // Draw confidence score in cyberpunk style
+                val scoreText = String.format("MATCH: %.1f%%", detection.categories()[0].score() * 100)
+                val scoreWidth = statusPaint.measureText(scoreText)
+                val scoreBackgroundRect = RectF(
+                    right - scoreWidth - 20f,
+                    top - 40f,
+                    right,
+                    top
                 )
+                canvas.drawRect(scoreBackgroundRect, textBackgroundPaint)
+                canvas.drawText(scoreText, scoreBackgroundRect.left + 10f,
+                    scoreBackgroundRect.bottom - 10f, statusPaint)
             }
         }
+    }
+
+    private fun drawCyberpunkBox(canvas: Canvas, left: Float, top: Float, right: Float, bottom: Float) {
+        // Draw main box with dashed effect
+        val outerRect = RectF(left - 10f, top - 10f, right + 10f, bottom + 10f)
+        canvas.drawRect(outerRect, cyberpunkOuterPaint)
+
+        // Draw inner box
+        val innerRect = RectF(left + 5f, top + 5f, right - 5f, bottom - 5f)
+        canvas.drawRect(innerRect, cyberpunkInnerPaint)
+
+        // Draw corner accents (top-left)
+        canvas.drawLine(left - 10f, top - 10f, left - 10f + animCornerLength, top - 10f, cyberpunkOuterPaint)
+        canvas.drawLine(left - 10f, top - 10f, left - 10f, top - 10f + animCornerLength, cyberpunkOuterPaint)
+
+        // Draw corner accents (top-right)
+        canvas.drawLine(right + 10f - animCornerLength, top - 10f, right + 10f, top - 10f, cyberpunkOuterPaint)
+        canvas.drawLine(right + 10f, top - 10f, right + 10f, top - 10f + animCornerLength, cyberpunkOuterPaint)
+
+        // Draw corner accents (bottom-left)
+        canvas.drawLine(left - 10f, bottom + 10f, left - 10f + animCornerLength, bottom + 10f, cyberpunkOuterPaint)
+        canvas.drawLine(left - 10f, bottom + 10f - animCornerLength, left - 10f, bottom + 10f, cyberpunkOuterPaint)
+
+        // Draw corner accents (bottom-right)
+        canvas.drawLine(right + 10f - animCornerLength, bottom + 10f, right + 10f, bottom + 10f, cyberpunkOuterPaint)
+        canvas.drawLine(right + 10f, bottom + 10f - animCornerLength, right + 10f, bottom + 10f, cyberpunkOuterPaint)
     }
 
     fun setResults(
@@ -128,6 +235,11 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         scaleFactor = min(width * 1f / imageWidth, height * 1f / imageHeight)
 
         invalidate()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        scanLineAnimator?.cancel()
     }
 
     companion object {

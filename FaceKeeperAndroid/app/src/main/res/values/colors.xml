@@ -24,4 +24,9 @@
     <color name="icActive">#FFFFFFFF</color>
     <color name="icFocused">#DDFFFFFF</color>
     <color name="icPressed">#AAFFFFFF</color>
+    <!-- Add these to your existing colors.xml file -->
+    <color name="cyberpunk_cyan">#00FFFF</color>
+    <color name="cyberpunk_magenta">#FF00FF</color>
+    <color name="cyberpunk_yellow">#FFFF00</color>
+    <color name="cyberpunk_dark">#121212</color>
 </resources>
