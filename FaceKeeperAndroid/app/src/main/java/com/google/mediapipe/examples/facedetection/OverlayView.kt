@@ -25,6 +25,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var scanLineY = 0f
     private var scanLineAnimator: ValueAnimator? = null
     private var avatarBitmap: Bitmap? = null
+    private var avatarBitmap_jacus: Bitmap? = null
+    private var avatarBitmap_wojtus: Bitmap? = null
     private var scanLinePaint = Paint()
 
     private var scaleFactor: Float = 1f
@@ -36,6 +38,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     // Hardcoded information
     private val personName = "V. SILVERHAND"
+    private val personName_jacus = "JACEK URBANOWICZ"
+    private val personName_wojtus = "WOJCIECH ŁOBODA"
     private val personStatus = "STATUS: IDENTIFIED"
     private val idNumber = "ID: NC-" + (1000000..9999999).random()
 
@@ -48,6 +52,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private fun loadResources() {
         // Load the avatar bitmap
         val drawable = ContextCompat.getDrawable(context!!, R.drawable.cyberpunk_avatar)
+        val drawable_jacus = ContextCompat.getDrawable(context!!, R.drawable.jacus)
+        val drawable_wojtus = ContextCompat.getDrawable(context!!, R.drawable.wojtus)
         if (drawable != null) {
             val width = 150
             val height = 150
@@ -55,6 +61,24 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             val canvas = Canvas(avatarBitmap!!)
             drawable.setBounds(0, 0, canvas.width, canvas.height)
             drawable.draw(canvas)
+        }
+
+        if (drawable_jacus != null) {
+            val width = 150
+            val height = 150
+            avatarBitmap_jacus = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(avatarBitmap_jacus!!)
+            drawable_jacus.setBounds(0, 0, canvas.width, canvas.height)
+            drawable_jacus.draw(canvas)
+        }
+
+        if (drawable_wojtus != null) {
+            val width = 150
+            val height = 150
+            avatarBitmap_wojtus = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(avatarBitmap_wojtus!!)
+            drawable_wojtus.setBounds(0, 0, canvas.width, canvas.height)
+            drawable_wojtus.draw(canvas)
         }
     }
 
@@ -161,9 +185,26 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 val indexText = String.format("ID: %s", index)
 
 
+                val bitmap = when (index) {
+                    0 -> avatarBitmap_jacus
+                    1 -> avatarBitmap_wojtus
+                    else -> avatarBitmap
+                }
+
+                val name = when (index) {
+                    0 -> personName_jacus
+                    1 -> personName_wojtus
+                    else -> personName
+                }
+
+                val status = when (index) {
+                    0 -> "STATUS: IDENTIFIED"
+                    1 -> "STATUS: IDENTIFIED"
+                    else -> "STATUS: UNKNOWN"
+                }
 
                 // Draw avatar image
-                avatarBitmap?.let { bitmap ->
+                bitmap?.let { bitmap ->
 
                     val infoBackgroundRect = RectF(
                         left + 10f,
@@ -179,9 +220,9 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                         canvas.drawBitmap(bitmap, avatarLeft, avatarTop, null)
 
                         // Draw name and status
-                        canvas.drawText(personName, avatarLeft + bitmap.width + 10f,
+                        canvas.drawText(name, avatarLeft + bitmap.width + 10f,
                             avatarTop + 40f, namePaint)
-                        canvas.drawText(personStatus, avatarLeft + bitmap.width + 10f,
+                        canvas.drawText(status, avatarLeft + bitmap.width + 10f,
                             avatarTop + 80f, statusPaint)
                         canvas.drawText(indexText, avatarLeft + bitmap.width + 10f,
                             avatarTop + 120f, statusPaint)
@@ -190,9 +231,9 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                         val altAvatarTop = bottom + 10f
                         canvas.drawBitmap(bitmap, avatarLeft, altAvatarTop, null)
 
-                        canvas.drawText(personName, avatarLeft + bitmap.width + 10f,
+                        canvas.drawText(name, avatarLeft + bitmap.width + 10f,
                             altAvatarTop + 40f, namePaint)
-                        canvas.drawText(personStatus, avatarLeft + bitmap.width + 10f,
+                        canvas.drawText(status, avatarLeft + bitmap.width + 10f,
                             altAvatarTop + 80f, statusPaint)
                         canvas.drawText(indexText, avatarLeft + bitmap.width + 10f,
                             altAvatarTop + 120f, statusPaint)
