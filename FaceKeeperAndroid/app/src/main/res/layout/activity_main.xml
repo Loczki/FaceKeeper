@@ -31,7 +31,6 @@
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/view"
             android:background="@android:color/transparent"
             android:keepScreenOn="true"
             app:defaultNavHost="true"
@@ -45,27 +44,32 @@
             android:layout_alignParentTop="true"
             android:background="@color/toolbar_background">
 
-            <ImageView
-                android:layout_width="wrap_content"
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:src="@drawable/media_pipe_banner" />
+                android:text="FaceKeeper"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:gravity="center"
+
+                />
         </androidx.appcompat.widget.Toolbar>
 
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/navigation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/toolbar"
-            app:itemIconTint="@color/bg_nav_item"
-            app:itemTextColor="@color/bg_nav_item"
-            app:menu="@menu/menu_bottom_nav" />
+<!--        <com.google.android.material.bottomnavigation.BottomNavigationView-->
+<!--            android:id="@+id/navigation"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_below="@+id/toolbar"-->
+<!--            app:itemIconTint="@color/bg_nav_item"-->
+<!--            app:itemTextColor="@color/bg_nav_item"-->
+<!--            app:menu="@menu/menu_bottom_nav" />-->
 
-        <View
-            android:id="@+id/view"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_below="@id/navigation"
-            android:background="@android:color/darker_gray" />
+<!--        <View-->
+<!--            android:id="@+id/view"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="1dp"-->
+<!--            android:layout_below="@id/navigation"-->
+<!--            android:background="@android:color/darker_gray" />-->
 
     </RelativeLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

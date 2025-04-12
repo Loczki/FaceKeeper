@@ -143,6 +143,11 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 val left = boundingBox.left * scaleFactor
                 val right = boundingBox.right * scaleFactor
 
+//                val top = (boundingBox.top + 80)* scaleFactor
+//                val bottom = (boundingBox.bottom + 180) * scaleFactor
+//                val left = (boundingBox.left + 70) * scaleFactor
+//                val right = (boundingBox.right + 170) * scaleFactor
+
                 val boxHeight = bottom - top
                 val boxWidth = right - left
 
@@ -264,4 +269,5 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     companion object {
         private const val BOUNDING_RECT_TEXT_PADDING = 8
     }
+
 }
