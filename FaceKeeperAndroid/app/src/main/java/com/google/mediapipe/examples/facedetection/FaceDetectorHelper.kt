@@ -364,7 +364,7 @@ class FaceDetectorHelper(
     companion object {
         const val DELEGATE_CPU = 0
         const val DELEGATE_GPU = 1
-        const val THRESHOLD_DEFAULT = 0.5F
+        const val THRESHOLD_DEFAULT = 0.8F
         const val OTHER_ERROR = 0
         const val GPU_ERROR = 1
 

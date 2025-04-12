@@ -134,6 +134,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         super.draw(canvas)
 
         results?.let {
+            var index = 0;
             for (detection in it.detections()) {
                 val boundingBox = detection.boundingBox()
 
@@ -152,8 +153,21 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 val currentScanY = top + (boxHeight * scanLineY)
                 canvas.drawLine(left, currentScanY, right, currentScanY, scanLinePaint)
 
+                val indexText = String.format("ID: %s", index)
+
+
+
                 // Draw avatar image
                 avatarBitmap?.let { bitmap ->
+
+                    val infoBackgroundRect = RectF(
+                        left + 10f,
+                        top - bitmap.height - 10f,
+                        left + bitmap.width + 10f + textPaint.measureText(personName),
+                        top - 10f
+                    )
+                    canvas.drawRect(infoBackgroundRect, textBackgroundPaint)
+
                     val avatarLeft = left + 10f
                     val avatarTop = top - bitmap.height - 10f
                     if (avatarTop > 0) {
@@ -164,7 +178,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                             avatarTop + 40f, namePaint)
                         canvas.drawText(personStatus, avatarLeft + bitmap.width + 10f,
                             avatarTop + 80f, statusPaint)
-                        canvas.drawText(idNumber, avatarLeft + bitmap.width + 10f,
+                        canvas.drawText(indexText, avatarLeft + bitmap.width + 10f,
                             avatarTop + 120f, statusPaint)
                     } else {
                         // Draw below the face if not enough space above
@@ -175,9 +189,13 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                             altAvatarTop + 40f, namePaint)
                         canvas.drawText(personStatus, avatarLeft + bitmap.width + 10f,
                             altAvatarTop + 80f, statusPaint)
-                        canvas.drawText(idNumber, avatarLeft + bitmap.width + 10f,
+                        canvas.drawText(indexText, avatarLeft + bitmap.width + 10f,
                             altAvatarTop + 120f, statusPaint)
                     }
+
+
+
+
                 }
 
                 // Draw confidence score in cyberpunk style
@@ -192,6 +210,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 canvas.drawRect(scoreBackgroundRect, textBackgroundPaint)
                 canvas.drawText(scoreText, scoreBackgroundRect.left + 10f,
                     scoreBackgroundRect.bottom - 10f, statusPaint)
+                index++;
             }
         }
     }
