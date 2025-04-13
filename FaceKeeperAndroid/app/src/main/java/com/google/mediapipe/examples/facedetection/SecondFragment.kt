@@ -21,7 +21,7 @@ class SecondFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.textViewMessage.text = "You swiped right into SecondFragment!"
+//        binding.textViewMessage.text = "You swiped right into SecondFragment!"
     }
 
     override fun onDestroyView() {
