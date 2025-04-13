@@ -1,49 +1,114 @@
-<!--
-    ~ Copyright 2023 The TensorFlow Authors. All Rights Reserved.
-    ~
-    ~ Licensed under the Apache License, Version 2.0 (the "License");
-    ~ you may not use this file except in compliance with the License.
-    ~ You may obtain a copy of the License at
-    ~
-    ~       http://www.apache.org/licenses/LICENSE-2.0
-    ~
-    ~ Unless required by applicable law or agreed to in writing, software
-    ~ distributed under the License is distributed on an "AS IS" BASIS,
-    ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    ~ See the License for the specific language governing permissions and
-    ~ limitations under the License.
--->
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/bottom_sheet_layout"
     android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
     android:background="@color/bottom_sheet_background"
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:padding="@dimen/bottom_sheet_padding"
-    android:layout_height="wrap_content"
     app:behavior_hideable="false"
     app:behavior_peekHeight="@dimen/bottom_sheet_peek_height"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <androidx.appcompat.widget.LinearLayoutCompat
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <!-- Chevron indicating that the bottom sheet is expandable -->
+        <!-- Chevron -->
         <RelativeLayout
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-                android:src="@drawable/icn_chevron_up"
-                android:contentDescription="@string/alt_bottom_sheet_chevron" />
+                android:contentDescription="@string/alt_bottom_sheet_chevron"
+                android:src="@drawable/icn_chevron_up" />
         </RelativeLayout>
+
+        <!-- User Profile Card -->
+        <!-- User Profile Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <!-- Avatar -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    app:cardCornerRadius="40dp"
+                    app:cardElevation="0dp">
+
+                    <ImageView
+                        android:id="@+id/user_avatar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/cyberpunk_avatar"/>
+                </androidx.cardview.widget.CardView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+
+                    <!-- User Info Header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/user_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@Piotreqsl"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Additional User Info -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/user_status"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp"
+                            android:text="Status: Active"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/user_role"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp"
+                            android:text="Role: Administrator"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
         <!-- Inference time row -->
         <androidx.appcompat.widget.LinearLayoutCompat
@@ -51,21 +116,23 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/bottom_sheet_default_row_margin"
             android:orientation="horizontal">
+
             <TextView
                 android:id="@+id/inference_time_label"
-                android:text="@string/label_inference_time"
-                android:textColor="@color/bottom_sheet_text_color"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:text="@string/label_inference_time"
+                android:textColor="@color/bottom_sheet_text_color"
                 android:textSize="@dimen/bottom_sheet_text_size" />
+
             <TextView
                 android:id="@+id/inference_time_val"
-                android:text="0ms"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="end"
                 android:layout_centerVertical="true"
+                android:gravity="end"
+                android:text="0ms"
                 android:textColor="@color/bottom_sheet_text_color"
                 android:textSize="@dimen/bottom_sheet_text_size" />
         </androidx.appcompat.widget.LinearLayoutCompat>
@@ -81,17 +148,17 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/label_confidence_threshold"
                 android:layout_centerVertical="true"
-                android:textSize="@dimen/bottom_sheet_text_size"
-                android:textColor="@color/bottom_sheet_text_color" />
+                android:text="@string/label_confidence_threshold"
+                android:textColor="@color/bottom_sheet_text_color"
+                android:textSize="@dimen/bottom_sheet_text_size" />
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:gravity="center_vertical"
-                android:orientation="horizontal"
-                >
+                android:orientation="horizontal">
 
                 <androidx.appcompat.widget.AppCompatImageButton
                     android:id="@+id/threshold_minus"
@@ -104,8 +171,7 @@
                     android:id="@+id/threshold_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/bottom_sheet_control_text_side_margin"
-                    android:layout_marginRight="@dimen/bottom_sheet_control_text_side_margin"
+                    android:layout_marginHorizontal="@dimen/bottom_sheet_control_text_side_margin"
                     android:gravity="center"
                     android:minEms="@integer/bottom_sheet_control_text_min_ems"
                     android:textColor="@color/bottom_sheet_text_color"
@@ -116,7 +182,7 @@
                     android:layout_width="@dimen/bottom_sheet_control_btn_size"
                     android:layout_height="@dimen/bottom_sheet_control_btn_size"
                     android:contentDescription="@string/alt_bottom_sheet_threshold_button_plus"
-                    android:src="@drawable/ic_plus"  />
+                    android:src="@drawable/ic_plus" />
             </LinearLayout>
         </RelativeLayout>
 
@@ -127,22 +193,21 @@
             android:layout_marginTop="@dimen/bottom_sheet_default_row_margin">
 
             <TextView
-                android:text="@string/label_delegate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/bottom_sheet_text_size"
-                android:textColor="@color/bottom_sheet_text_color" />
+                android:text="@string/label_delegate"
+                android:textColor="@color/bottom_sheet_text_color"
+                android:textSize="@dimen/bottom_sheet_text_size" />
 
             <androidx.appcompat.widget.AppCompatSpinner
                 android:id="@+id/spinner_delegate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:entries="@array/delegate_spinner_titles"
                 android:minWidth="@dimen/bottom_sheet_spinner_delegate_min_width"
                 android:spinnerMode="dropdown"
-                android:theme="@style/BottomSheetSpinnerItemStyle"
-                android:layout_alignParentRight="true"
-                android:entries="@array/delegate_spinner_titles"/>
-
+                android:theme="@style/BottomSheetSpinnerItemStyle" />
         </RelativeLayout>
     </androidx.appcompat.widget.LinearLayoutCompat>
 </androidx.core.widget.NestedScrollView>

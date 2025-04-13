@@ -29,4 +29,6 @@
     <style name="AppThemeProgressStyle">
         <item name="colorAccent">@color/mp_variant</item>
     </style>
+
+
 </resources>
