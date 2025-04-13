@@ -27,6 +27,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var avatarBitmap: Bitmap? = null
     private var avatarBitmap_jacus: Bitmap? = null
     private var avatarBitmap_wojtus: Bitmap? = null
+    private var runeBitmap1: Bitmap? = null
+    private var runeBitmap2: Bitmap? = null
     private var scanLinePaint = Paint()
 
     private var scaleFactor: Float = 1f
@@ -42,6 +44,15 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private val personName_wojtus = "WOJCIECH ŁOBODA"
     private val personStatus = "STATUS: IDENTIFIED"
     private val idNumber = "ID: NC-" + (1000000..9999999).random()
+    private val currentDateTime = "2025-04-13 01:55:53"
+    private val currentUser = "Piotreqsl"
+
+    // Dodaj nowe pole dla efektu blur
+    private val blurPaint = Paint().apply {
+        maskFilter = BlurMaskFilter(50f, BlurMaskFilter.Blur.NORMAL)
+        color = Color.BLACK
+        style = Paint.Style.FILL
+    }
 
     init {
         initPaints()
@@ -50,10 +61,13 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     }
 
     private fun loadResources() {
-        // Load the avatar bitmap
+        // Load the avatar bitmaps
         val drawable = ContextCompat.getDrawable(context!!, R.drawable.cyberpunk_avatar)
         val drawable_jacus = ContextCompat.getDrawable(context!!, R.drawable.jacus)
         val drawable_wojtus = ContextCompat.getDrawable(context!!, R.drawable.wojtus)
+        val runeDrawable1 = ContextCompat.getDrawable(context!!, R.drawable.runa1)
+        val runeDrawable2 = ContextCompat.getDrawable(context!!, R.drawable.runa2)
+
         if (drawable != null) {
             val width = 150
             val height = 150
@@ -80,10 +94,27 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             drawable_wojtus.setBounds(0, 0, canvas.width, canvas.height)
             drawable_wojtus.draw(canvas)
         }
+
+        if (runeDrawable1 != null) {
+            val width = 150
+            val height = 150
+            runeBitmap1 = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(runeBitmap1!!)
+            runeDrawable1.setBounds(0, 0, canvas.width, canvas.height)
+            runeDrawable1.draw(canvas)
+        }
+
+        if (runeDrawable2 != null) {
+            val width = 150
+            val height = 150
+            runeBitmap2 = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(runeBitmap2!!)
+            runeDrawable2.setBounds(0, 0, canvas.width, canvas.height)
+            runeDrawable2.draw(canvas)
+        }
     }
 
     private fun startAnimations() {
-        // Scan line animation
         scanLineAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 1500
             repeatCount = ValueAnimator.INFINITE
@@ -98,22 +129,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-    fun clear() {
-        results = null
-        textPaint.reset()
-        textBackgroundPaint.reset()
-        boxPaint.reset()
-        cyberpunkOuterPaint.reset()
-        cyberpunkInnerPaint.reset()
-        namePaint.reset()
-        statusPaint.reset()
-        scanLinePaint.reset()
-        invalidate()
-        initPaints()
-    }
-
     private fun initPaints() {
-        textBackgroundPaint.color = Color.parseColor("#80000000") // Semi-transparent black
+        textBackgroundPaint.color = Color.parseColor("#80000000")
         textBackgroundPaint.style = Paint.Style.FILL
         textBackgroundPaint.textSize = 50f
 
@@ -125,40 +142,28 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         boxPaint.strokeWidth = 8F
         boxPaint.style = Paint.Style.STROKE
 
-        // Cyberpunk-style outer box
-        cyberpunkOuterPaint.color = Color.parseColor("#00FFFF") // Cyan
+        cyberpunkOuterPaint.color = Color.parseColor("#00FFFF")
         cyberpunkOuterPaint.strokeWidth = cornerStrokeWidth
         cyberpunkOuterPaint.style = Paint.Style.STROKE
         cyberpunkOuterPaint.pathEffect = DashPathEffect(floatArrayOf(10f, 5f), 0f)
         cyberpunkOuterPaint.setShadowLayer(15f, 0f, 0f, Color.parseColor("#00FFFF"))
 
-        // Cyberpunk-style inner box
-        cyberpunkInnerPaint.color = Color.parseColor("#FF00FF") // Magenta
+        cyberpunkInnerPaint.color = Color.parseColor("#FF00FF")
         cyberpunkInnerPaint.strokeWidth = cornerStrokeWidth / 2
         cyberpunkInnerPaint.style = Paint.Style.STROKE
         cyberpunkInnerPaint.pathEffect = DashPathEffect(floatArrayOf(5f, 10f), 0f)
 
-        // Scan line paint
-        scanLinePaint.color = Color.parseColor("#80FF00FF") // Semi-transparent magenta
+        scanLinePaint.color = Color.parseColor("#80FF00FF")
         scanLinePaint.strokeWidth = scanLineHeight
         scanLinePaint.style = Paint.Style.STROKE
 
-        // Name text paint
-        namePaint.color = Color.parseColor("#00FFFF") // Cyan
+        namePaint.color = Color.parseColor("#00FFFF")
         namePaint.textSize = 40f
         namePaint.typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
 
-        // Status text paint
-        statusPaint.color = Color.parseColor("#FF00FF") // Magenta
+        statusPaint.color = Color.parseColor("#FF00FF")
         statusPaint.textSize = 30f
         statusPaint.typeface = Typeface.create("monospace", Typeface.NORMAL)
-    }
-
-    // Dodaj nowe pole dla efektu blur
-    private val blurPaint = Paint().apply {
-        maskFilter = BlurMaskFilter(50f, BlurMaskFilter.Blur.NORMAL)
-        color = Color.BLACK
-        style = Paint.Style.FILL
     }
 
     override fun draw(canvas: Canvas) {
@@ -177,10 +182,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 val boxHeight = bottom - top
                 val boxWidth = right - left
 
-                // Draw cyberpunk-style outer box with corner accents
                 drawCyberpunkBox(canvas, left, top, right, bottom)
 
-                // Draw scan line
                 val currentScanY = top + (boxHeight * scanLineY)
                 canvas.drawLine(left, currentScanY, right, currentScanY, scanLinePaint)
 
@@ -204,12 +207,11 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                     else -> "STATUS: UNKNOWN"
                 }
 
-                // Draw avatar image
                 bitmap?.let { bitmap ->
                     val infoBackgroundRect = RectF(
                         left + 10f,
                         top - bitmap.height - 10f,
-                        left + bitmap.width + 10f + textPaint.measureText(personName),
+                        left + bitmap.width + 10f + textPaint.measureText(personName) + 170f, // Increased width for rune
                         top - 10f
                     )
                     canvas.drawRect(infoBackgroundRect, textBackgroundPaint)
@@ -217,9 +219,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                     val avatarLeft = left + 10f
                     val avatarTop = top - bitmap.height - 10f
 
-                    // Jeśli to niezidentyfikowana twarz (index > 1), dodaj efekt rozmycia
                     if (index > 1) {
-                        // Narysuj prostokąt z efektem rozmycia na obszarze twarzy
                         canvas.drawRect(
                             left,
                             top,
@@ -230,9 +230,18 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                     }
 
                     if (avatarTop > 0) {
+                        // Draw avatar
                         canvas.drawBitmap(bitmap, avatarLeft, avatarTop, null)
 
-                        // Draw name and status
+                        // Draw rune for identified users
+                        if (index <= 1) {
+                            val runeBitmap = if (index == 0) runeBitmap1 else runeBitmap2
+                            runeBitmap?.let { rune ->
+                                val runeLeft = left + bitmap.width + textPaint.measureText(personName) + 20f
+                                canvas.drawBitmap(rune, runeLeft, avatarTop, null)
+                            }
+                        }
+
                         canvas.drawText(
                             name, avatarLeft + bitmap.width + 10f,
                             avatarTop + 40f, namePaint
@@ -246,9 +255,17 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                             avatarTop + 120f, statusPaint
                         )
                     } else {
-                        // Draw below the face if not enough space above
                         val altAvatarTop = bottom + 10f
                         canvas.drawBitmap(bitmap, avatarLeft, altAvatarTop, null)
+
+                        // Draw rune for identified users
+                        if (index <= 1) {
+                            val runeBitmap = if (index == 0) runeBitmap1 else runeBitmap2
+                            runeBitmap?.let { rune ->
+                                val runeLeft = left + bitmap.width + textPaint.measureText(personName) + 20f
+                                canvas.drawBitmap(rune, runeLeft, altAvatarTop, null)
+                            }
+                        }
 
                         canvas.drawText(
                             name, avatarLeft + bitmap.width + 10f,
@@ -265,7 +282,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                     }
                 }
 
-                // Draw confidence score in cyberpunk style
                 val scoreText = String.format("MATCH: %.1f%%", detection.categories()[0].score() * 100)
                 val scoreWidth = statusPaint.measureText(scoreText)
                 val scoreBackgroundRect = RectF(
@@ -285,27 +301,21 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     }
 
     private fun drawCyberpunkBox(canvas: Canvas, left: Float, top: Float, right: Float, bottom: Float) {
-        // Draw main box with dashed effect
         val outerRect = RectF(left - 10f, top - 10f, right + 10f, bottom + 10f)
         canvas.drawRect(outerRect, cyberpunkOuterPaint)
 
-        // Draw inner box
         val innerRect = RectF(left + 5f, top + 5f, right - 5f, bottom - 5f)
         canvas.drawRect(innerRect, cyberpunkInnerPaint)
 
-        // Draw corner accents (top-left)
         canvas.drawLine(left - 10f, top - 10f, left - 10f + animCornerLength, top - 10f, cyberpunkOuterPaint)
         canvas.drawLine(left - 10f, top - 10f, left - 10f, top - 10f + animCornerLength, cyberpunkOuterPaint)
 
-        // Draw corner accents (top-right)
         canvas.drawLine(right + 10f - animCornerLength, top - 10f, right + 10f, top - 10f, cyberpunkOuterPaint)
         canvas.drawLine(right + 10f, top - 10f, right + 10f, top - 10f + animCornerLength, cyberpunkOuterPaint)
 
-        // Draw corner accents (bottom-left)
         canvas.drawLine(left - 10f, bottom + 10f, left - 10f + animCornerLength, bottom + 10f, cyberpunkOuterPaint)
         canvas.drawLine(left - 10f, bottom + 10f - animCornerLength, left - 10f, bottom + 10f, cyberpunkOuterPaint)
 
-        // Draw corner accents (bottom-right)
         canvas.drawLine(right + 10f - animCornerLength, bottom + 10f, right + 10f, bottom + 10f, cyberpunkOuterPaint)
         canvas.drawLine(right + 10f, bottom + 10f - animCornerLength, right + 10f, bottom + 10f, cyberpunkOuterPaint)
     }
@@ -316,13 +326,22 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         imageWidth: Int,
     ) {
         results = detectionResults
-
-        // Images, videos and camera live streams are displayed in FIT_START mode. So we need to scale
-        // up the bounding box to match with the size that the images/videos/live streams being
-        // displayed.
         scaleFactor = min(width * 1f / imageWidth, height * 1f / imageHeight)
-
         invalidate()
+    }
+
+    fun clear() {
+        results = null
+        textPaint.reset()
+        textBackgroundPaint.reset()
+        boxPaint.reset()
+        cyberpunkOuterPaint.reset()
+        cyberpunkInnerPaint.reset()
+        namePaint.reset()
+        statusPaint.reset()
+        scanLinePaint.reset()
+        invalidate()
+        initPaints()
     }
 
     override fun onDetachedFromWindow() {
@@ -333,5 +352,4 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     companion object {
         private const val BOUNDING_RECT_TEXT_PADDING = 8
     }
-
 }
