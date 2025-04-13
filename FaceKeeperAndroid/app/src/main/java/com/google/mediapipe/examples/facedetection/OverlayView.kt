@@ -154,11 +154,18 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         statusPaint.typeface = Typeface.create("monospace", Typeface.NORMAL)
     }
 
+    // Dodaj nowe pole dla efektu blur
+    private val blurPaint = Paint().apply {
+        maskFilter = BlurMaskFilter(50f, BlurMaskFilter.Blur.NORMAL)
+        color = Color.BLACK
+        style = Paint.Style.FILL
+    }
+
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
 
         results?.let {
-            var index = 0;
+            var index = 0
             for (detection in it.detections()) {
                 val boundingBox = detection.boundingBox()
 
@@ -166,11 +173,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 val bottom = boundingBox.bottom * scaleFactor
                 val left = boundingBox.left * scaleFactor
                 val right = boundingBox.right * scaleFactor
-
-//                val top = (boundingBox.top + 80)* scaleFactor
-//                val bottom = (boundingBox.bottom + 180) * scaleFactor
-//                val left = (boundingBox.left + 70) * scaleFactor
-//                val right = (boundingBox.right + 170) * scaleFactor
 
                 val boxHeight = bottom - top
                 val boxWidth = right - left
@@ -183,7 +185,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 canvas.drawLine(left, currentScanY, right, currentScanY, scanLinePaint)
 
                 val indexText = String.format("ID: %s", index)
-
 
                 val bitmap = when (index) {
                     0 -> avatarBitmap_jacus
@@ -205,7 +206,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
                 // Draw avatar image
                 bitmap?.let { bitmap ->
-
                     val infoBackgroundRect = RectF(
                         left + 10f,
                         top - bitmap.height - 10f,
@@ -216,32 +216,53 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
                     val avatarLeft = left + 10f
                     val avatarTop = top - bitmap.height - 10f
+
+                    // Jeśli to niezidentyfikowana twarz (index > 1), dodaj efekt rozmycia
+                    if (index > 1) {
+                        // Narysuj prostokąt z efektem rozmycia na obszarze twarzy
+                        canvas.drawRect(
+                            left,
+                            top,
+                            right,
+                            bottom,
+                            blurPaint
+                        )
+                    }
+
                     if (avatarTop > 0) {
                         canvas.drawBitmap(bitmap, avatarLeft, avatarTop, null)
 
                         // Draw name and status
-                        canvas.drawText(name, avatarLeft + bitmap.width + 10f,
-                            avatarTop + 40f, namePaint)
-                        canvas.drawText(status, avatarLeft + bitmap.width + 10f,
-                            avatarTop + 80f, statusPaint)
-                        canvas.drawText(indexText, avatarLeft + bitmap.width + 10f,
-                            avatarTop + 120f, statusPaint)
+                        canvas.drawText(
+                            name, avatarLeft + bitmap.width + 10f,
+                            avatarTop + 40f, namePaint
+                        )
+                        canvas.drawText(
+                            status, avatarLeft + bitmap.width + 10f,
+                            avatarTop + 80f, statusPaint
+                        )
+                        canvas.drawText(
+                            indexText, avatarLeft + bitmap.width + 10f,
+                            avatarTop + 120f, statusPaint
+                        )
                     } else {
                         // Draw below the face if not enough space above
                         val altAvatarTop = bottom + 10f
                         canvas.drawBitmap(bitmap, avatarLeft, altAvatarTop, null)
 
-                        canvas.drawText(name, avatarLeft + bitmap.width + 10f,
-                            altAvatarTop + 40f, namePaint)
-                        canvas.drawText(status, avatarLeft + bitmap.width + 10f,
-                            altAvatarTop + 80f, statusPaint)
-                        canvas.drawText(indexText, avatarLeft + bitmap.width + 10f,
-                            altAvatarTop + 120f, statusPaint)
+                        canvas.drawText(
+                            name, avatarLeft + bitmap.width + 10f,
+                            altAvatarTop + 40f, namePaint
+                        )
+                        canvas.drawText(
+                            status, avatarLeft + bitmap.width + 10f,
+                            altAvatarTop + 80f, statusPaint
+                        )
+                        canvas.drawText(
+                            indexText, avatarLeft + bitmap.width + 10f,
+                            altAvatarTop + 120f, statusPaint
+                        )
                     }
-
-
-
-
                 }
 
                 // Draw confidence score in cyberpunk style
@@ -254,9 +275,11 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                     top
                 )
                 canvas.drawRect(scoreBackgroundRect, textBackgroundPaint)
-                canvas.drawText(scoreText, scoreBackgroundRect.left + 10f,
-                    scoreBackgroundRect.bottom - 10f, statusPaint)
-                index++;
+                canvas.drawText(
+                    scoreText, scoreBackgroundRect.left + 10f,
+                    scoreBackgroundRect.bottom - 10f, statusPaint
+                )
+                index++
             }
         }
     }
