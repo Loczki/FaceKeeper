@@ -15,17 +15,24 @@
  */
 package com.google.mediapipe.examples.facedetection
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
+import android.view.GestureDetector
+import android.view.MotionEvent
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GestureDetectorCompat
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
 import com.google.mediapipe.examples.facedetection.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var activityMainBinding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
+    private lateinit var gestureDetector: GestureDetectorCompat
+    private var hasSwipedRight = false
+    private var hasSwipedLeft = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,10 +42,79 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
         val navController = navHostFragment.navController
-//        activityMainBinding.navigation.setupWithNavController(navController)
-//        activityMainBinding.navigation.setOnNavigationItemReselectedListener {
-//            // ignore the reselection
-//        }
+        // Uncomment if using bottom navigation
+        // activityMainBinding.navigation.setupWithNavController(navController)
+
+        gestureDetector = GestureDetectorCompat(this, SwipeGestureListener())
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        return gestureDetector.onTouchEvent(event) || super.onTouchEvent(event)
+    }
+
+    inner class SwipeGestureListener : GestureDetector.SimpleOnGestureListener() {
+        private val SWIPE_THRESHOLD = 100
+        private val SWIPE_VELOCITY_THRESHOLD = 100
+
+        override fun onFling(
+            e1: MotionEvent,
+            e2: MotionEvent,
+            velocityX: Float,
+            velocityY: Float
+        ): Boolean {
+            val diffX = e2.x - e1.x
+            val diffY = e2.y - e1.y
+            if (Math.abs(diffX) > Math.abs(diffY) &&
+                Math.abs(diffX) > SWIPE_THRESHOLD &&
+                Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+
+                if (diffX > 0) {
+                    onRightSwipe()
+                } else {
+                    onLeftSwipe()
+                }
+                return true
+            }
+            return false
+        }
+    }
+
+    private fun onRightSwipe() {
+        if (hasSwipedRight) return
+        hasSwipedRight = true
+        hasSwipedLeft = false
+
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
+        val navController = navHostFragment.navController
+
+        val navOptions = NavOptions.Builder()
+            .setEnterAnim(R.anim.slide_in_left)     // New fragment slides in from left
+            .setExitAnim(R.anim.slide_out_right)    // Current fragment slides out to right
+            .setPopEnterAnim(R.anim.slide_in_right) // When coming back, slide in from right
+            .setPopExitAnim(R.anim.slide_out_left)  // When going back, slide out to left
+            .build()
+
+        navController.navigate(R.id.secondFragment, null, navOptions)
+    }
+
+    private fun onLeftSwipe() {
+        if (hasSwipedLeft) return
+        hasSwipedLeft = true
+        hasSwipedRight = false
+
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
+        val navController = navHostFragment.navController
+
+        val navOptions = NavOptions.Builder()
+            .setEnterAnim(R.anim.slide_in_right)    // New fragment slides in from right
+            .setExitAnim(R.anim.slide_out_left)     // Current fragment slides out to left
+            .setPopEnterAnim(R.anim.slide_in_left)  // Back: slide in from left
+            .setPopExitAnim(R.anim.slide_out_right) // Back: slide out to right
+            .build()
+
+        navController.navigate(R.id.camera_fragment, null, navOptions)
     }
 
     override fun onBackPressed() {
