@@ -49,4 +49,10 @@
         android:id="@+id/gallery_fragment"
         android:name="com.google.mediapipe.examples.facedetection.fragments.GalleryFragment"
         android:label="GalleryFragment" />
+
+    <fragment
+        android:id="@+id/secondFragment"
+        android:name="com.google.mediapipe.examples.facedetection.SecondFragment"
+        android:label="Second Fragment"
+        layout="@layout/fragment_second" />        
 </navigation>
