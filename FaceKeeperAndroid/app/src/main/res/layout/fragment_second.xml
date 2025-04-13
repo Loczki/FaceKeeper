@@ -62,12 +62,6 @@
                         android:textColor="#FF00FF"/>
                 </LinearLayout>
 
-                <!-- Current user's rune -->
-                <ImageView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:src="@drawable/runa1"
-                    android:scaleType="fitCenter"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
